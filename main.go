@@ -1,56 +1,31 @@
 package main
 
 import (
-	"log"
-	"os"
-	"os/signal"
-
-	"github.com/Shopify/sarama"
+	"github.com/digicatapult/wasp-simple-h264-payload-parser/kafka"
 )
 
 func main() {
 	topicName := "videos"
 	kafkaBrokers := []string{"localhost:9092"}
 
-	setupConsumer(kafkaBrokers, topicName)
-}
+	receivedMsgs := make(chan []byte)
 
-func setupConsumer(kafkaBrokers []string, topicName string) {
-	consumer, err := sarama.NewConsumer(kafkaBrokers, nil)
-	if err != nil {
-		panic(err)
-	}
+	kafka.SetupConsumer(kafkaBrokers, topicName, receivedMsgs)
 
-	defer func() {
-		if err := consumer.Close(); err != nil {
-			log.Fatalln(err)
-		}
-	}()
+	/// do something with the messages
 
-	partitionConsumer, err := consumer.ConsumePartition(topicName, 0, 0)
-	if err != nil {
-		panic(err)
-	}
+	// 	// Trap SIGINT to trigger a shutdown.
+	// 	signals := make(chan os.Signal, 1)
+	// 	signal.Notify(signals, os.Interrupt)
 
-	defer func() {
-		if err := partitionConsumer.Close(); err != nil {
-			log.Fatalln(err)
-		}
-	}()
-
-	// Trap SIGINT to trigger a shutdown.
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
-
-	consumed := 0
-ConsumerLoop:
-	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			log.Printf("Consumed message offset %d\n", msg.Offset)
-			consumed++
-		case <-signals:
-			break ConsumerLoop
-		}
-	}
+	// 	consumed := 0
+	// ReceivedLoop:
+	// 	for {
+	// 		select {
+	// 		case msg := <-receivedMsgs:
+	// 			fmt.Println(msg)
+	// 		case <-signals:
+	// 			break ReceivedLoop
+	// 		}
+	// 	}
 }
