@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Shopify/sarama"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -27,18 +28,21 @@ func NewMessager() *Messager {
 // WithConsumer will set the consumer instance on the messager
 func (m *Messager) WithConsumer(c sarama.Consumer) *Messager {
 	m.c = c
+
 	return m
 }
 
 // WithProducer will set the producer instance on the messager
 func (m *Messager) WithProducer(p sarama.SyncProducer) *Messager {
 	m.sp = p
+
 	return m
 }
 
-// WithRelayTransform will set the relay tranform func instance on the messager
+// WithRelayTransform will set the relay transform func instance on the messager
 func (m *Messager) WithRelayTransform(rt RelayTransform) *Messager {
 	m.rt = rt
+
 	return m
 }
 
@@ -56,12 +60,14 @@ func (m *Messager) SendMessage(topic, mKey string, mValue []byte) error {
 
 	partition, offset, err := m.sp.SendMessage(msg)
 	if err != nil {
+		err = errors.Wrap(err, "problem sending message")
 		zap.S().Errorf("error sending msg %s - %s (%d, %d", msg.Key, err, partition, offset)
 
 		return err
 	}
 
 	zap.S().Debugf("Message sent to partition %d, offset %d", partition, offset)
+
 	return nil
 }
 
@@ -70,6 +76,7 @@ func (m *Messager) Listen(topic string, received chan []byte, signals chan bool)
 	if m.c == nil {
 		panic("nil consumer")
 	}
+
 	partitionConsumer, err := m.c.ConsumePartition(topic, 0, 0)
 	if err != nil {
 		panic(err)
@@ -82,6 +89,7 @@ func (m *Messager) Listen(topic string, received chan []byte, signals chan bool)
 	}()
 
 	consumed := 0
+
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
@@ -99,6 +107,41 @@ func (m *Messager) Relay(inTopic, outTopic string, stop chan os.Signal) error {
 	receivedMsgs := make(chan []byte)
 	signals := make(chan bool)
 
+	m.validateRelay()
+
+	go m.Listen(inTopic, receivedMsgs, signals)
+
+	go func() {
+		for {
+			select {
+			case msg := <-receivedMsgs:
+				m.executeTransform(msg, outTopic)
+			case <-stop:
+				signals <- true
+
+				close(receivedMsgs)
+
+				return
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (m *Messager) executeTransform(msg []byte, outTopic string) {
+	transformed, err := m.rt(msg)
+	if err != nil {
+		zap.S().Error(err)
+	}
+
+	err = m.SendMessage(outTopic, "", transformed)
+	if err != nil {
+		zap.S().Error(err)
+	}
+}
+
+func (m *Messager) validateRelay() {
 	if m.c == nil {
 		panic("nil consumer")
 	}
@@ -110,30 +153,4 @@ func (m *Messager) Relay(inTopic, outTopic string, stop chan os.Signal) error {
 	if m.rt == nil {
 		panic("nil relay transform")
 	}
-
-	go m.Listen(inTopic, receivedMsgs, signals)
-
-	go func() {
-		for {
-			select {
-			case msg := <-receivedMsgs:
-				transformed, err := m.rt(msg)
-				if err != nil {
-					zap.S().Error(err)
-				}
-
-				err = m.SendMessage(outTopic, "", transformed)
-				if err != nil {
-					zap.S().Error(err)
-				}
-
-			case <-stop:
-				signals <- true
-				close(receivedMsgs)
-				return
-			}
-		}
-	}()
-
-	return nil
 }

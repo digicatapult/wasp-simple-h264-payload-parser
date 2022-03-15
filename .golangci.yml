@@ -114,7 +114,7 @@ linters-settings:
       - default # Contains all imports that could not be matched to another section type.
       # - comment(your text here) # Prints the specified indented comment.
       # - newLine # Prints an empty line
-      - prefix(github.com/digicatapult/wasp-ingest-rtmp) # Groups all imports with the specified Prefix.
+      - prefix(github.com/digicatapult/wasp-simple-h264-payload-parser) # Groups all imports with the specified Prefix.
 
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)

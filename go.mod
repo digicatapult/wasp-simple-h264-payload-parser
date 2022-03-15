@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/Shopify/sarama v1.32.0
+	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.21.0
 )

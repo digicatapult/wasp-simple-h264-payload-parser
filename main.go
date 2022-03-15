@@ -51,9 +51,9 @@ func main() {
 	}
 
 	defer func() {
-		err := logger.Sync()
+		syncErr := logger.Sync()
 		if err != nil {
-			log.Printf("error whilst syncing zap: %s\n", err)
+			log.Printf("error whilst syncing zap: %s\n", syncErr)
 		}
 	}()
 
@@ -79,5 +79,8 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	relayer.Relay(inTopicName, outTopicName, stop)
+	err = relayer.Relay(inTopicName, outTopicName, stop)
+	if err != nil {
+		zap.S().Error(err)
+	}
 }
