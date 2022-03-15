@@ -3,10 +3,14 @@ package util
 import "os"
 
 const (
-	// KafkaBrokersEnv is the kafka brokers environment variable name
-	KafkaBrokersEnv = "KAFKA_BROKERS"
-	// KafkaTopicEnv is the kafka topic environment variable name
-	KafkaTopicEnv = "KAFKA_TOPIC"
+	// InTopicNameKey defines the environment variable key for InTopicName
+	InTopicNameKey = "IN_TOPIC_NAME_KEY"
+
+	// OutTopicNameKey defines the environment variable key for OutTopicName
+	OutTopicNameKey = "OUT_TOPIC_NAME_KEY"
+
+	// KafkaBrokersKey defines the environment variable key for KafkaBrokers
+	KafkaBrokersKey = "KAFKA_BROKERS"
 )
 
 // GetEnv will lookup a environment variable or return the default

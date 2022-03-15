@@ -14,21 +14,10 @@ import (
 	"github.com/digicatapult/wasp-simple-h264-payload-parser/wasp"
 )
 
-const (
-	// InTopicNameKey defines the environment variable key for InTopicName
-	InTopicNameKey = "IN_TOPIC_NAME_KEY"
-
-	// OutTopicNameKey defines the environment variable key for OutTopicName
-	OutTopicNameKey = "OUT_TOPIC_NAME_KEY"
-
-	// KafkaBrokersKey defines the environment variable key for KafkaBrokers
-	KafkaBrokersKey = "KAFKA_BROKERS"
-)
-
 func main() {
-	inTopicName := util.GetEnv(InTopicNameKey, "payloads.simpleH264")
-	outTopicName := util.GetEnv(OutTopicNameKey, "video")
-	kafkaBrokersVar := util.GetEnv(KafkaBrokersKey, "localhost:9092")
+	inTopicName := util.GetEnv(util.InTopicNameKey, "payloads.simpleH264")
+	outTopicName := util.GetEnv(util.OutTopicNameKey, "video")
+	kafkaBrokersVar := util.GetEnv(util.KafkaBrokersKey, "localhost:9092")
 	kafkaBrokers := strings.Split(kafkaBrokersVar, ",")
 
 	cfg := zap.NewDevelopmentConfig()
