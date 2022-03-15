@@ -21,10 +21,10 @@ func main() {
 	kafkaBrokers := strings.Split(kafkaBrokersVar, ",")
 
 	cfg := zap.NewDevelopmentConfig()
-	if os.Getenv("ENV") == "production" {
+	if util.GetEnv(util.EnvKey, "") == "production" {
 		cfg = zap.NewProductionConfig()
 
-		lvl, err := zap.ParseAtomicLevel(os.Getenv("LOG_LEVEL"))
+		lvl, err := zap.ParseAtomicLevel(util.GetEnv(util.LogLevelKey, "debug"))
 		if err != nil {
 			panic("invalid log level")
 		}

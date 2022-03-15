@@ -11,6 +11,12 @@ const (
 
 	// KafkaBrokersKey defines the environment variable key for KafkaBrokers
 	KafkaBrokersKey = "KAFKA_BROKERS"
+
+	// EnvKey defines the environment variable key for Env
+	EnvKey = "ENV"
+
+	// LogLevelKey defines the environment variable key for LogLevel
+	LogLevelKey = "LOG_LEVEL"
 )
 
 // GetEnv will lookup a environment variable or return the default
