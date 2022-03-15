@@ -1,31 +1,38 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+
+	"github.com/Shopify/sarama"
+	"go.uber.org/zap"
+
 	"github.com/digicatapult/wasp-simple-h264-payload-parser/kafka"
+	"github.com/digicatapult/wasp-simple-h264-payload-parser/wasp"
 )
 
 func main() {
-	topicName := "videos"
+	inTopicName := "videos"
+	outTopicName := "videos-transformed"
 	kafkaBrokers := []string{"localhost:9092"}
 
-	receivedMsgs := make(chan []byte)
+	consumer, err := sarama.NewConsumer(kafkaBrokers, nil)
+	if err != nil {
+		panic(err)
+	}
 
-	kafka.SetupConsumer(kafkaBrokers, topicName, receivedMsgs)
+	producer, err := sarama.NewSyncProducer(kafkaBrokers, nil)
+	if err != nil {
+		zap.S().Fatalf("problem initiating producer: %s", err)
+	}
 
-	/// do something with the messages
+	relayer := kafka.NewMessager().
+		WithConsumer(consumer).
+		WithProducer(producer).
+		WithRelayTransform(wasp.TransformVideoMessages)
 
-	// 	// Trap SIGINT to trigger a shutdown.
-	// 	signals := make(chan os.Signal, 1)
-	// 	signal.Notify(signals, os.Interrupt)
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
 
-	// 	consumed := 0
-	// ReceivedLoop:
-	// 	for {
-	// 		select {
-	// 		case msg := <-receivedMsgs:
-	// 			fmt.Println(msg)
-	// 		case <-signals:
-	// 			break ReceivedLoop
-	// 		}
-	// 	}
+	relayer.Relay(inTopicName, outTopicName, stop)
 }

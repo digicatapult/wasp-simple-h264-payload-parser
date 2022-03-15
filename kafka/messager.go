@@ -3,16 +3,20 @@ package kafka
 import (
 	"log"
 	"os"
-	"os/signal"
 
 	"github.com/Shopify/sarama"
 	"go.uber.org/zap"
 )
 
+// RelayTransform aliases the function for transforming relayed messages
+type RelayTransform func(msg []byte) ([]byte, error)
+
 // Messager implements kafka message functionality
 type Messager struct {
 	sp sarama.SyncProducer
 	c  sarama.Consumer
+
+	rt RelayTransform
 }
 
 // NewMessager will instantiate an instance using the producer provided
@@ -29,6 +33,12 @@ func (m *Messager) WithConsumer(c sarama.Consumer) *Messager {
 // WithProducer will set the producer instance on the messager
 func (m *Messager) WithProducer(p sarama.SyncProducer) *Messager {
 	m.sp = p
+	return m
+}
+
+// WithRelayTransform will set the relay tranform func instance on the messager
+func (m *Messager) WithRelayTransform(rt RelayTransform) *Messager {
+	m.rt = rt
 	return m
 }
 
@@ -56,7 +66,7 @@ func (m *Messager) SendMessage(topic, mKey string, mValue []byte) error {
 }
 
 // Listen will listen indefinitely to the kafka bus for messages on a specific topic
-func (m *Messager) Listen(topic string, received chan []byte) {
+func (m *Messager) Listen(topic string, received chan []byte, signals chan bool) {
 	if m.c == nil {
 		panic("nil consumer")
 	}
@@ -71,19 +81,59 @@ func (m *Messager) Listen(topic string, received chan []byte) {
 		}
 	}()
 
-	// Trap SIGINT to trigger a shutdown.
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
-
 	consumed := 0
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			log.Printf("Consumed message offset %d\n", msg.Offset)
+			log.Printf("Consumed %s message offset %d\n", msg.Topic, msg.Offset)
 			consumed++
 			received <- msg.Value
 		case <-signals:
 			return
 		}
 	}
+}
+
+// Relay will start listening for messages, transforming, and sending onwards
+func (m *Messager) Relay(inTopic, outTopic string, stop chan os.Signal) error {
+	receivedMsgs := make(chan []byte)
+	signals := make(chan bool)
+
+	if m.c == nil {
+		panic("nil consumer")
+	}
+
+	if m.sp == nil {
+		panic("nil producer")
+	}
+
+	if m.rt == nil {
+		panic("nil relay transform")
+	}
+
+	go m.Listen(inTopic, receivedMsgs, signals)
+
+	go func() {
+		for {
+			select {
+			case msg := <-receivedMsgs:
+				transformed, err := m.rt(msg)
+				if err != nil {
+					zap.S().Error(err)
+				}
+
+				err = m.SendMessage(outTopic, "", transformed)
+				if err != nil {
+					zap.S().Error(err)
+				}
+
+			case <-stop:
+				signals <- true
+				close(receivedMsgs)
+				return
+			}
+		}
+	}()
+
+	return nil
 }
