@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	inTopicName := "videos"
-	outTopicName := "videos-transformed"
+	inTopicName := "payloads.simpleH264"
+	outTopicName := "video"
 	kafkaBrokers := []string{"localhost:9092"}
 
 	consumer, err := sarama.NewConsumer(kafkaBrokers, nil)

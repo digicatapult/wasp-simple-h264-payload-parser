@@ -14,8 +14,8 @@ import (
 )
 
 func TestWaspTransformRelay(t *testing.T) {
-	inTopicName := "videos"
-	outTopicName := "videos-transformed"
+	inTopicName := "payloads.simpleH264"
+	outTopicName := "video"
 	kafkaBrokers := []string{"localhost:9092"}
 
 	consumer, err := sarama.NewConsumer(kafkaBrokers, nil)
@@ -59,13 +59,15 @@ func TestWaspTransformRelay(t *testing.T) {
 		}
 	}()
 
-	wg.Add(1)
-	producer.SendMessage(&sarama.ProducerMessage{
-		Topic: inTopicName,
-		Key:   nil,
-		Value: nil,
-	})
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		producer.SendMessage(&sarama.ProducerMessage{
+			Topic: inTopicName,
+			Key:   nil,
+			Value: nil,
+		})
+	}
 
 	wg.Wait()
-	assert.Equal(t, 1, consumed)
+	assert.Equal(t, 1000, consumed)
 }
