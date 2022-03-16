@@ -1,5 +1,11 @@
 package wasp
 
+import (
+	"encoding/json"
+
+	"github.com/pkg/errors"
+)
+
 // IngestMessage defines the video ingest message structure
 type IngestMessage struct {
 	Ingest    string                 `json:"ingest"`
@@ -17,16 +23,36 @@ type OutputMessage struct {
 	Type      string
 	Timestamp string
 	Value     string
-	Metadata  string
+	Metadata  map[string]interface{}
 }
 
 // TransformVideoMessages processes the messages as part of the message relay
 func TransformVideoMessages(msg []byte) ([]byte, error) {
 	// Transform messages here
 	// Unmarshal
+	var (
+		ingest = &IngestMessage{}
+		err    error
+	)
+
+	if err = json.Unmarshal(msg, ingest); err != nil {
+		return nil, errors.Wrap(err, "unable to unmarshal ingest")
+	}
 	// Modify values
 	// Create new message
+	output := &OutputMessage{
+		ThingID:   ingest.ThingID,
+		Type:      ingest.Type,
+		Timestamp: ingest.Timestamp,
+		Value:     ingest.Payload,
+		Metadata:  ingest.Metadata,
+	}
 	// Marshal
+	outputMsg, err := json.Marshal(output)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal output message")
+	}
+
 	// return
-	return msg, nil
+	return outputMsg, nil
 }
