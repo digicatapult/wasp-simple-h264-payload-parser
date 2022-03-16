@@ -7,7 +7,7 @@ type IngestMessage struct {
 	Timestamp string                 `json:"timestamp"`
 	Payload   string                 `json:"payload"`
 	Metadata  map[string]interface{} `json:"metadata"`
-	ThingID   string                 `json:"thingID"`
+	ThingID   string                 `json:"thingId"`
 	Type      string                 `json:"type"`
 }
 
