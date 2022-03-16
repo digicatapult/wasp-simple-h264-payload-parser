@@ -2,11 +2,13 @@ package wasp
 
 // IngestMessage defines the video ingest message structure
 type IngestMessage struct {
-	Ingest    string `json:"ingest"`
-	IngestID  string `json:"ingestId"`
-	Timestamp string `json:"timestamp"`
-	Payload   string `json:"payload"`
-	Metadata  string `json:"metadata"`
+	Ingest    string                 `json:"ingest"`
+	IngestID  string                 `json:"ingestId"`
+	Timestamp string                 `json:"timestamp"`
+	Payload   string                 `json:"payload"`
+	Metadata  map[string]interface{} `json:"metadata"`
+	ThingID   string                 `json:"thingID"`
+	Type      string                 `json:"type"`
 }
 
 // OutputMessage defines the output message structure
