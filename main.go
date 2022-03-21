@@ -72,4 +72,9 @@ func main() {
 	if err != nil {
 		zap.S().Error(err)
 	}
+
+	select {
+	case <-stop:
+		zap.S().Info("closing down")
+	}
 }
