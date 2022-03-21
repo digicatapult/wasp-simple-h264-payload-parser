@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	inTopicName := util.GetEnv(util.InTopicNameKey, "payloads.simpleH264")
+	inTopicName := util.GetEnv(util.InTopicNameKey, "payloads.h264")
 	outTopicName := util.GetEnv(util.OutTopicNameKey, "video")
 	kafkaBrokersVar := util.GetEnv(util.KafkaBrokersKey, "localhost:9092")
 	kafkaBrokers := strings.Split(kafkaBrokersVar, ",")
