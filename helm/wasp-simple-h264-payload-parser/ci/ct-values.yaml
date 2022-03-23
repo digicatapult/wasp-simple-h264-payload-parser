@@ -1,0 +1,30 @@
+config:
+  init:
+    registerThingType: true
+    thingServiceName: waspthingmock
+    thingServicePort: 80
+waspthingmock:
+  enabled: true
+  service:
+    type: ClusterIP
+  serverBlock: |-
+    upstream static_backend {
+      server localhost:8080;
+    }
+    server {
+      listen 0.0.0.0:8080;
+      location /v1/thingType {
+        proxy_method GET;
+        if ($http_content_type != "application/json") {
+            return 415;
+        }
+        proxy_pass http://static_backend/thingType-mock;
+      }
+      location /thingType-mock {
+        return 201 "{}";
+      }
+    }
+image:
+  repository: 'wasp-simple-h264-payload-parser'
+  tag: 'latest'
+  PullPolicy: Never

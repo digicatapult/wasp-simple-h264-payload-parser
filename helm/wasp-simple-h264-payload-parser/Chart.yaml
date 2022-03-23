@@ -1,0 +1,20 @@
+apiVersion: v2
+name: wasp-simple-h264-payload-parser
+appVersion: '0.0.1'
+description: A Helm chart for WASP-SIMPLE-H264-PAYLOAD-PARSER
+version: '0.0.1'
+type: application
+maintainers:
+  - name: CDECatapult
+    email: opensource@digicatapult.org.uk
+    url: www.digicatapult.org.uk
+dependencies:
+  - name: kafka
+    version: '12.7.3'
+    repository: https://charts.bitnami.com/bitnami
+    condition: kafka.enabled
+  - name: nginx
+    alias: waspthingmock
+    version: '^8.7.1'
+    repository: https://charts.bitnami.com/bitnami
+    condition: waspthingmock.enabled

@@ -1,0 +1,23 @@
+config:
+  logLevel: info
+  # kafkaBrokers:
+  port: 80
+  waspSensorType: h264
+  kafkaOutTopic: video
+  kafkaPayloadRoutingPrefix: payloads
+  kafkaPayloadsReplicationFactor: 1
+  kafkaPayloadsPartitions: 5
+  init:
+    registerThingType: true
+    thingServiceName: wasp-thing-service
+    thingServicePort: 80
+replicaCount: 1
+kafka:
+  enabled: true
+waspthingmock:
+  enabled: false
+image:
+  repository: ghcr.io/digicatapult/wasp-simple-h264-payload-parser
+  pullPolicy: IfNotPresent
+  tag: "v0.0.1"
+  pullSecrets: ["ghcr-cdecatapult"]

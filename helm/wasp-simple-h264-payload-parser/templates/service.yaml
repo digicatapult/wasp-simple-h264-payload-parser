@@ -1,0 +1,10 @@
+{{- $fullName := include "wasp-simple-h264-payload-parser.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: wasp-simple-h264-payload-parser
+  labels:
+    {{- include "wasp-simple-h264-payload-parser.labels" . | nindent 4 }}
+spec:
+  selector:
+    name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}
+  labels:
+    {{- include "wasp-simple-h264-payload-parser.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      labels:
+        name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}
+    spec:
+      {{- include "wasp-simple-h264-payload-parser.imagePullSecrets" . | indent 6 }}
+      initContainers:
+        {{- include "wasp-simple-h264-payload-parser.init.thingType" . | indent 8 }}
+        {{- include "wasp-simple-h264-payload-parser.init.kafkaTopics" . | indent 8 }}
+      containers:
+        - name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          env:
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}-config
+                  key: logLevel
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}-config
+                  key: kafkaBrokers
+            - name: IN_TOPIC_NAME_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}-config
+                  key: kafkaInTopic
+            - name: OUT_TOPIC_NAME_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}-config
+                  key: KafkaOutTopic
+            - name: ENV
+              value: production
