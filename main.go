@@ -73,8 +73,6 @@ func main() {
 		zap.S().Error(err)
 	}
 
-	select {
-	case <-stop:
-		zap.S().Info("closing down")
-	}
+	<-stop
+	zap.S().Info("closing down")
 }

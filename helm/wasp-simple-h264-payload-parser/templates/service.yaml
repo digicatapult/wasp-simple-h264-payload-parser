@@ -1,0 +1,16 @@
+{{- $fullName := include "wasp-simple-h264-payload-parser.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: wasp-simple-h264-payload-parser
+  labels:
+    {{- include "wasp-simple-h264-payload-parser.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}
+  ports:
+    - name: http
+      protocol: 'TCP'
+      port: 80
+      targetPort: 80

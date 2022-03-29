@@ -4,7 +4,9 @@
 *.dll
 *.so
 *.dylib
-wasp-simple-h264-payload-parser
+*.tgz
+/wasp-simple-h264-payload-parser
+dist/
 
 # Test binary, built with `go test -c`
 *.test
