@@ -102,7 +102,7 @@ linters-settings:
     # switch
     default-signifies-exhaustive: true
   funlen:
-    lines: 60
+    lines: 70
     statements: 40
   gci:
     # put imports beginning with prefix after 3rd-party packages;
