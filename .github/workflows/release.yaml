@@ -93,7 +93,6 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          target: production
           load: true
           file: ./Dockerfile
           secrets: |

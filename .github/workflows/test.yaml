@@ -91,7 +91,6 @@ jobs:
           context: .
           load: true
           file: ./Dockerfile
-          target: production
           tags: |
             ${{ needs.repo_ids.outputs.repo_name }}:latest
           labels: |
