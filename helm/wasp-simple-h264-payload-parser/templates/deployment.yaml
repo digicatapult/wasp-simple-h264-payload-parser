@@ -45,6 +45,6 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: {{ include "wasp-simple-h264-payload-parser.fullname" . }}-config
-                  key: KafkaOutTopic
+                  key: kafkaOutTopic
             - name: ENV
               value: production

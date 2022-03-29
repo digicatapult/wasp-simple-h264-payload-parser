@@ -87,6 +87,12 @@ if the mock is disabled then just use the name provided in the init config
   {{- end -}}
 {{- end -}}
 
+*/}}
+{{- define "wasp-simple-h264-payload-parser.init.payload-topic.name" -}}
+{{- $name := include "wasp-simple-h264-payload-parser.fullname" . -}}
+{{- printf "%s-payload-topic" $name | lower | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{/*
 Init container definitions to assert thingType
 */}}
@@ -100,7 +106,7 @@ Init container definitions to assert thingType
     - 'until nslookup $THING_NAME.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for wasp-thing-service; sleep 2; done'
   env:
     - name: THING_NAME
-      value: {{ include "wasp-simple-h264-payload-parser.thing-service-name" . }}
+      value: {{ include "wasp-simple-h264-payload-parser.thingServiceName" . }}
 - name: {{ printf "%s-register" $name | trunc 63 | trimSuffix "-" }}
   image: curlimages/curl:7.75.0
   command:
@@ -109,7 +115,7 @@ Init container definitions to assert thingType
     - 'echo "Asserting type $SENSOR_TYPE"; code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type:application/json" http://$THING_NAME:$THINGS_PORT/v1/thingType -d "{ \"name\": \"$SENSOR_TYPE\" }"); echo "Assertion result: $code"; case $code in 201|409) exit 0 ;; *) exit 1 ;; esac;'
   env:
     - name: THING_NAME
-      value: {{ include "wasp-simple-h264-payload-parser.thing-service-name" . }}
+      value: {{ include "wasp-simple-h264-payload-parser.thingServiceName" . }}
     - name: THINGS_PORT
       value: {{ .Values.config.init.thingServicePort | quote }}
     - name: SENSOR_TYPE
