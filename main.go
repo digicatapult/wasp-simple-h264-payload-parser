@@ -74,6 +74,5 @@ func main() {
 	}
 
 	<-stop
-       zap.S().Info("closing down")
-	}
+	zap.S().Info("closing down")
 }
