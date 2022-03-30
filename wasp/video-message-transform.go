@@ -11,7 +11,7 @@ type IngestMessage struct {
 	Ingest    string                 `json:"ingest"`
 	IngestID  string                 `json:"ingestId"`
 	Timestamp string                 `json:"timestamp"`
-	Payload   string                 `json:"payload"`
+	Payload   *Payload               `json:"payload"`
 	Metadata  map[string]interface{} `json:"metadata"`
 	ThingID   string                 `json:"thingId"`
 	Type      string                 `json:"type"`
@@ -22,8 +22,18 @@ type OutputMessage struct {
 	ThingID   string
 	Type      string
 	Timestamp string
-	Value     string
+	Value     *Payload
 	Metadata  map[string]interface{}
+}
+
+// Payload defines the data contained in
+type Payload struct {
+	ID          string
+	FrameNo     int
+	Filename    string
+	Type        string
+	Data        []byte `json:"-"`
+	EncodedData string `json:"data"`
 }
 
 // TransformVideoMessages processes the messages as part of the message relay
