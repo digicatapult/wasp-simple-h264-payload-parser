@@ -33,7 +33,7 @@ type Payload struct {
 	Filename    string
 	Type        string
 	Data        []byte `json:"-"`
-	EncodedData string `json:"Data"`
+	EncodedData string `json:"data"`
 }
 
 // TransformVideoMessages processes the messages as part of the message relay
